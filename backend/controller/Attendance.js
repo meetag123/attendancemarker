@@ -40,12 +40,7 @@ export const Getemployeeattend = async (req, res) => {
     }
 
     const attendance = await Attendance.find({ date: parsedDate }).populate("employee");
-    // if (!attendance.length) {
-    //   return res.status(404).json({
-    //     success: false,
-    //     message: 'No attendance records found for this date',
-    //   });
-    // }
+
     res.status(200).json(attendance);
   } catch (err) {
     console.error("Error in Getemployeeattend:", err);
@@ -68,6 +63,7 @@ export const BatchEmployeeAttend = async (req, res) => {
       if (!mongoose.Types.ObjectId.isValid(employeeId) || parsedDate === null || present === undefined) {
         throw new Error(`Invalid record: employeeId=${employeeId}, date=${date}`);
       }
+      
       return {
         updateOne: {
           filter: { employee: employeeId, date: parsedDate },

@@ -5,19 +5,25 @@ import EmployeeForm from './EmployeeForm';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { UsersIcon, TrashIcon, PlusIcon } from '@heroicons/react/24/outline';
+import { useDispatch } from 'react-redux';
+import { use } from 'react';
+import { deleteEmployee, getEmployee } from '../slice/EmployeeSlice';
 
 const Employee = () => {
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const dispatch=useDispatch();
 
   useEffect(() => {
     const fetchEmployees = async () => {
       try {
         setLoading(true);
-        const res = await axiosconfig.get('/all');
-        if (res.status === 200) {
-          setEmployees(res.data);
+        // const res = await axiosconfig.get('/all');
+        const resultAction= await dispatch(getEmployee());
+        if (getEmployee.fulfilled.match(resultAction)) {
+        const employeesData = resultAction.payload;
+        setEmployees(employeesData);
         } else {
           toast.error('Unexpected response format.', { autoClose: 3000 });
         }
@@ -31,12 +37,14 @@ const Employee = () => {
       }
     };
     fetchEmployees();
+    
   }, []);
 
   const handleDelete = async (id) => {
     try {
-      await axiosconfig.delete(`delete/${id}`);
-      setEmployees(employees.filter((e) => e._id !== id));
+      // await axiosconfig.delete(`delete/${id}`);
+      dispatch(deleteEmployee(id));
+    
       toast.success('Employee deleted successfully!', { autoClose: 2000 });
     } catch (error) {
       console.error('Delete error:', error);
@@ -53,24 +61,24 @@ const Employee = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-cream to-teal-500 flex flex-col items-center py-10 px-4 font-poppins">
+    <div className="flex flex-col items-center min-h-screen px-4 py-10 bg-gradient-to-br from-cream to-teal-500 font-poppins">
       {/* Header */}
-      <header className="w-full max-w-4xl mb-6 flex items-center justify-center space-x-2">
-        <UsersIcon className="h-8 w-8 text-coral-500" />
+      <header className="flex items-center justify-center w-full max-w-4xl mb-6 space-x-2">
+        <UsersIcon className="w-8 h-8 text-coral-500" />
         <h1 className="text-3xl font-bold text-gray-800">Employee Management</h1>
       </header>
 
       {/* Main Content */}
-      <div className="w-full max-w-4xl bg-white rounded-xl shadow-lg p-6">
+      <div className="w-full max-w-4xl p-6 bg-white shadow-lg rounded-xl">
         {/* Toggle Form Button */}
         <div className="flex justify-end mb-6">
           <button
             onClick={() => setShowForm(!showForm)}
-            className="relative px-6 py-2 text-base font-semibold text-white bg-gradient-to-r from-coral-500 to-teal-500 hover:from-coral-600 hover:to-teal-600 rounded-lg shadow-sm flex items-center space-x-2"
+            className="relative flex items-center px-6 py-2 space-x-2 text-base font-semibold text-white rounded-lg shadow-sm bg-gradient-to-r from-coral-500 to-teal-500 hover:from-coral-600 hover:to-teal-600"
           >
-            <PlusIcon className="h-5 w-5" />
+            <PlusIcon className="w-5 h-5" />
             <span>{showForm ? 'Hide Form' : 'Add Employee'}</span>
-            <span className="absolute inset-0 rounded-lg animate-ripple pointer-events-none bg-white opacity-0"></span>
+            <span className="absolute inset-0 bg-white rounded-lg opacity-0 pointer-events-none animate-ripple"></span>
           </button>
         </div>
 
@@ -84,9 +92,9 @@ const Employee = () => {
         {/* Loading Animation */}
         {loading && (
           <div className="flex justify-center mb-6 space-x-2">
-            <div className="h-2 w-2 bg-coral-500 rounded-full animate-bounce-dots" style={{ animationDelay: '0s' }}></div>
-            <div className="h-2 w-2 bg-coral-500 rounded-full animate-bounce-dots" style={{ animationDelay: '0.2s' }}></div>
-            <div className="h-2 w-2 bg-coral-500 rounded-full animate-bounce-dots" style={{ animationDelay: '0.4s' }}></div>
+            <div className="w-2 h-2 rounded-full bg-coral-500 animate-bounce-dots" style={{ animationDelay: '0s' }}></div>
+            <div className="w-2 h-2 rounded-full bg-coral-500 animate-bounce-dots" style={{ animationDelay: '0.2s' }}></div>
+            <div className="w-2 h-2 rounded-full bg-coral-500 animate-bounce-dots" style={{ animationDelay: '0.4s' }}></div>
           </div>
         )}
 
@@ -94,26 +102,26 @@ const Employee = () => {
         {!loading && (
           <div className="space-y-2">
             {employees.length === 0 ? (
-              <div className="p-4 text-center text-gray-500 text-base">
+              <div className="p-4 text-base text-center text-gray-500">
                 No employees found.
               </div>
             ) : (
               employees.map((emp, index) => (
                 <div
                   key={emp._id}
-                  className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-teal-50 transition shadow-sm"
+                  className="flex items-center justify-between p-4 transition rounded-lg shadow-sm bg-gray-50 hover:bg-teal-50"
                 >
-                  <div className="flex-1 grid grid-cols-4 gap-4">
+                  <div className="grid flex-1 grid-cols-4 gap-4">
                     <span className="text-base text-gray-700">{emp.employeeCode || `EMP${index + 1}`}</span>
-                    <span className="text-base text-gray-700 font-medium">{emp.name}</span>
+                    <span className="text-base font-medium text-gray-700">{emp.name}</span>
                     <span className="text-base text-gray-600">{emp.email}</span>
                     <span className="text-base text-gray-700">{emp.phone}</span>
                   </div>
                   <button
                     onClick={() => handleDelete(emp._id)}
-                    className="text-coral-500 hover:text-coral-600 flex items-center space-x-1"
+                    className="flex items-center space-x-1 text-coral-500 hover:text-coral-600"
                   >
-                    <TrashIcon className="h-5 w-5" />
+                    <TrashIcon className="w-5 h-5" />
                     <span>Delete</span>
                   </button>
                 </div>
