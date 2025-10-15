@@ -1,3 +1,4 @@
+// backend/controller/Attendance.js
 import mongoose from 'mongoose';
 import { Attendance } from '../models/Attendance.js';
 
@@ -46,6 +47,7 @@ export const Getemployeeattend = async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 };
+
 export const BatchEmployeeAttend = async (req, res) => {
   try {
     const { records } = req.body;
@@ -105,7 +107,8 @@ export const attendancesummary = async (req, res) => {
           foreignField: "_id",
           as: "employeeInfo"
         },
-      }, {
+      }, 
+      {
         $unwind: "$employeeInfo",
       },
       {
@@ -116,12 +119,9 @@ export const attendancesummary = async (req, res) => {
           absentCount: 1,
         },
       },
-
-
     ]);
     res.status(200).json(summary);
-
   } catch (error) {
     res.status(500).json({ message: "Failed to generate summary", error });
   }
-}
+};
