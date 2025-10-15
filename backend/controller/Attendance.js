@@ -1,6 +1,5 @@
 import mongoose from 'mongoose';
 import { Attendance } from '../models/Attendance.js';
-import { User } from '../models/user.js';
 
 // Utility to safely parse dates and reset time
 const parseDate = (input) => {

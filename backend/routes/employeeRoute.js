@@ -1,4 +1,4 @@
-import { Addemployee, Deleteemployee, Getemployee } from "../controller/user.js";
+import { Addemployee, Deleteemployee, Getemployee } from "../controller/User.js";
 import express from 'express';
 const router=express.Router();
 router.post('/add',Addemployee);
