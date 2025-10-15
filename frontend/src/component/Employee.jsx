@@ -1,63 +1,46 @@
-
-import React, { useEffect, useState } from 'react';
-import axiosconfig from '../axiosconfig';
-import EmployeeForm from './EmployeeForm';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import { UsersIcon, TrashIcon, PlusIcon } from '@heroicons/react/24/outline';
-import { useDispatch } from 'react-redux';
-import { use } from 'react';
-import { deleteEmployee, getEmployee } from '../slice/EmployeeSlice';
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { getEmployee, deleteEmployee } from "../slice/EmployeeSlice";
+import EmployeeForm from "./EmployeeForm";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { UsersIcon, TrashIcon, PlusIcon } from "@heroicons/react/24/outline";
 
 const Employee = () => {
-  const [employees, setEmployees] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const dispatch = useDispatch();
+  const { employeedata: employees, loading, error } = useSelector(
+    (state) => state.employee
+  );
+
   const [showForm, setShowForm] = useState(false);
-  const dispatch=useDispatch();
 
+  // ✅ Fetch employees on mount
   useEffect(() => {
-    const fetchEmployees = async () => {
-      try {
-        setLoading(true);
-        // const res = await axiosconfig.get('/all');
-        const resultAction= await dispatch(getEmployee());
-        if (getEmployee.fulfilled.match(resultAction)) {
-        const employeesData = resultAction.payload;
-        setEmployees(employeesData);
-        } else {
-          toast.error('Unexpected response format.', { autoClose: 3000 });
-        }
-      } catch (error) {
-        console.error('Fetch error:', error);
-        toast.error(`Failed to load employees: ${error.response?.data?.message || error.message}`, {
-          autoClose: 3000,
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchEmployees();
-    
-  }, []);
+    dispatch(getEmployee());
+  }, [dispatch]);
 
+  // ✅ Handle delete
   const handleDelete = async (id) => {
     try {
-      // await axiosconfig.delete(`delete/${id}`);
-      dispatch(deleteEmployee(id));
-    
-      toast.success('Employee deleted successfully!', { autoClose: 2000 });
+      const resultAction = await dispatch(deleteEmployee(id));
+      if (deleteEmployee.fulfilled.match(resultAction)) {
+        toast.success("Employee deleted successfully!", { autoClose: 2000 });
+      } else {
+        toast.error("Failed to delete employee.", { autoClose: 3000 });
+      }
     } catch (error) {
-      console.error('Delete error:', error);
-      toast.error(`Failed to delete employee: ${error.response?.data?.message || error.message}`, {
-        autoClose: 3000,
-      });
+      toast.error(
+        `Failed to delete employee: ${error.response?.data?.message || error.message}`,
+        { autoClose: 3000 }
+      );
     }
   };
 
-  const handleAdd = (newEmp) => {
-    setEmployees([...employees, newEmp]);
+  // ✅ Handle add (refresh list after form submission)
+  const handleAdd = () => {
+    dispatch(getEmployee());
     setShowForm(false);
-    toast.success('Employee added successfully!', { autoClose: 2000 });
+    toast.success("Employee added successfully!", { autoClose: 2000 });
   };
 
   return (
@@ -77,7 +60,7 @@ const Employee = () => {
             className="relative flex items-center px-6 py-2 space-x-2 text-base font-semibold text-white rounded-lg shadow-sm bg-gradient-to-r from-coral-500 to-teal-500 hover:from-coral-600 hover:to-teal-600"
           >
             <PlusIcon className="w-5 h-5" />
-            <span>{showForm ? 'Hide Form' : 'Add Employee'}</span>
+            <span>{showForm ? "Hide Form" : "Add Employee"}</span>
             <span className="absolute inset-0 bg-white rounded-lg opacity-0 pointer-events-none animate-ripple"></span>
           </button>
         </div>
@@ -92,14 +75,30 @@ const Employee = () => {
         {/* Loading Animation */}
         {loading && (
           <div className="flex justify-center mb-6 space-x-2">
-            <div className="w-2 h-2 rounded-full bg-coral-500 animate-bounce-dots" style={{ animationDelay: '0s' }}></div>
-            <div className="w-2 h-2 rounded-full bg-coral-500 animate-bounce-dots" style={{ animationDelay: '0.2s' }}></div>
-            <div className="w-2 h-2 rounded-full bg-coral-500 animate-bounce-dots" style={{ animationDelay: '0.4s' }}></div>
+            <div
+              className="w-2 h-2 rounded-full bg-coral-500 animate-bounce-dots"
+              style={{ animationDelay: "0s" }}
+            ></div>
+            <div
+              className="w-2 h-2 rounded-full bg-coral-500 animate-bounce-dots"
+              style={{ animationDelay: "0.2s" }}
+            ></div>
+            <div
+              className="w-2 h-2 rounded-full bg-coral-500 animate-bounce-dots"
+              style={{ animationDelay: "0.4s" }}
+            ></div>
+          </div>
+        )}
+
+        {/* Error Message */}
+        {error && (
+          <div className="p-4 mb-4 text-red-600 bg-red-100 border border-red-200 rounded-lg">
+            {error}
           </div>
         )}
 
         {/* Employee List */}
-        {!loading && (
+        {!loading && employees && (
           <div className="space-y-2">
             {employees.length === 0 ? (
               <div className="p-4 text-base text-center text-gray-500">
@@ -112,8 +111,12 @@ const Employee = () => {
                   className="flex items-center justify-between p-4 transition rounded-lg shadow-sm bg-gray-50 hover:bg-teal-50"
                 >
                   <div className="grid flex-1 grid-cols-4 gap-4">
-                    <span className="text-base text-gray-700">{emp.employeeCode || `EMP${index + 1}`}</span>
-                    <span className="text-base font-medium text-gray-700">{emp.name}</span>
+                    <span className="text-base text-gray-700">
+                      {emp.employecode || `EMP${index + 1}`}
+                    </span>
+                    <span className="text-base font-medium text-gray-700">
+                      {emp.name}
+                    </span>
                     <span className="text-base text-gray-600">{emp.email}</span>
                     <span className="text-base text-gray-700">{emp.phone}</span>
                   </div>

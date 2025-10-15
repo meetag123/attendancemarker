@@ -85,10 +85,10 @@ const employeeSlice = createSlice({
       })
       .addCase(deleteEmployee.fulfilled, (state, action) => {
         state.loading = false;
+        const deletedId = action.payload?.user?._id || action.meta.arg;
         state.employeedata = state.employeedata.filter(
-          (employee) => employee._id !== action.payload
+          (emp) => emp._id !== deletedId
         );
-        state.message = action.payload.message;
       })
       .addCase(deleteEmployee.rejected, (state, action) => {
         state.loading = false;
