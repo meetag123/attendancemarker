@@ -1,8 +1,8 @@
 import express from 'express';
 import mongoose from 'mongoose';
 // import attendancerouter from './routes/AttendanceRoute.js';
-import employeerouter from './routes/EmployeeRoute.js';
-import attendanceRoute from './routes/AttendanceRoute.js';
+import employeerouter from './routes/employeeRoute.js';
+import attendanceRoute from './routes/attendanceRoute.js';
 import dotenv from 'dotenv';
 import cors from'cors';
 dotenv.config();
