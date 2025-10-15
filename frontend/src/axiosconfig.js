@@ -1,7 +1,8 @@
 import axios from 'axios';
 
 const axiosconfig = axios.create({
-  baseURL: 'http://localhost:5000/api',
+  // baseURL: 'http://localhost:5000/api',
+  baseURL:"https://attendancemarker-puce.vercel.app/api",
   headers: {
     'Content-Type': 'application/json',
   },
