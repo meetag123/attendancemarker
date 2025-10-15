@@ -25,4 +25,8 @@ mongoose.connect(process.env.URL,{
 }).then(()=>console.log('database connected succefully'))
 .catch((err)=>console.log("mongodb error",err));
 app.use('/api',attendanceRoute);
-app.use('/api',employeerouter)
+app.use('/api',employeerouter);
+app.get('/', (req, res) => {
+  console.log("Backend is running");
+  res.send("Backend is running 🚀");
+});
