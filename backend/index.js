@@ -11,7 +11,7 @@ const app=express();
 app.use(express.json());
 app.use(cors({
     // origin:"http://localhost:5173",
-    origin:"https://attendancemarker-5qnd.vercel.app/",
+    origin:"https://attendancemarker-5qnd.vercel.app",
     methods:["GET","PUT","DELETE","POST"],
     credentials:true
 }));
