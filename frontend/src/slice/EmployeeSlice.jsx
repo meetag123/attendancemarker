@@ -1,7 +1,7 @@
-// import reducer from "../../../../ecommerce/src/slice/FavouriteSlice";
-import { act } from "react";
 import { DeleteEmployee, Employeeform, GetEmployee } from "./EmployeeServices";
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+
+// ✅ Add employee
 export const employeeForm = createAsyncThunk(
   "employee/employeeForm",
   async ({ name, email, phone }, { rejectWithValue }) => {
@@ -10,11 +10,13 @@ export const employeeForm = createAsyncThunk(
       return data;
     } catch (error) {
       return rejectWithValue({
-        message: error.response.data.message || "employee not added",
+        message: error.response?.data?.message || "Employee not added",
       });
     }
   }
 );
+
+// ✅ Get all employees
 export const getEmployee = createAsyncThunk(
   "employee/getEmployee",
   async (_, { rejectWithValue }) => {
@@ -28,16 +30,18 @@ export const getEmployee = createAsyncThunk(
     }
   }
 );
+
+// ✅ Delete employee
 export const deleteEmployee = createAsyncThunk(
   "employee/deleteEmployee",
   async (id, { dispatch, rejectWithValue }) => {
     try {
       const data = await DeleteEmployee(id);
-      dispatch(getEmployee());
+      await dispatch(getEmployee()); // refresh list
       return data;
     } catch (error) {
       return rejectWithValue({
-        message: error.message.data.message || "cannot delete employee",
+        message: error.response?.data?.message || "Cannot delete employee",
       });
     }
   }
@@ -54,32 +58,38 @@ const employeeSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
+      // ADD EMPLOYEE
       .addCase(employeeForm.pending, (state) => {
         state.loading = true;
       })
       .addCase(employeeForm.fulfilled, (state, action) => {
         state.loading = false;
-        state.employeedata = action.payload;
-        state.message = action.payload.message;
+        // ✅ Push new employee if valid object
+        if (action.payload && typeof action.payload === "object" && !Array.isArray(action.payload)) {
+          state.employeedata.push(action.payload.user || action.payload);
+        }
+        state.message = action.payload?.message || "Employee added successfully";
       })
       .addCase(employeeForm.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload?.message || "Something went wrong";
-      }),
-      builder
-        .addCase(getEmployee.pending, (state) => {
-          state.loading = true;
-        })
-        .addCase(getEmployee.fulfilled, (state, action) => {
-          state.loading = false;
-          state.employeedata = action.payload;
-          state.message = action.payload.message;
-        })
-        .addCase(getEmployee.rejected, (state, action) => {
-          state.loading = false;
-          state.error = action.payload?.message || "Something went wrong";
-        });
-    builder
+      })
+
+      // GET EMPLOYEES
+      .addCase(getEmployee.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(getEmployee.fulfilled, (state, action) => {
+        state.loading = false;
+        // ✅ Ensure array
+        state.employeedata = Array.isArray(action.payload) ? action.payload : [];
+      })
+      .addCase(getEmployee.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload?.message || "Something went wrong";
+      })
+
+      // DELETE EMPLOYEE
       .addCase(deleteEmployee.pending, (state) => {
         state.loading = true;
       })
@@ -96,4 +106,5 @@ const employeeSlice = createSlice({
       });
   },
 });
+
 export default employeeSlice.reducer;
